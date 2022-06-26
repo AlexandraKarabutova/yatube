@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load static %}
+  <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-left bg-light">
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+
+      <div class="col-md-7">
+        <h1 class="featurette-heading fw-normal lh-1">
+          Привет, я автор
+        </h1>
+        <p class="lead">
+          Тут я размеcтила информацию о себе, используя свои умения верстать. 
+        </p>
+        <div class="container px-4 py-5" id="icon-grid">
+          <h2 class="pb-2 border-bottom">Контакты</h2>
+        </div>  
+
+        <div class="col d-flex align-items-start">
+          <svg class="bi text-muted flex-shrink-0 me-3" width="1.75em" height="1.75em"><use xlink:href="#cpu-fill"/></svg>
+          <img src="{% static 'img/tg.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+          <div>
+            <h4 class="fw-bold mb-0">Telegram</h4>
+            <p>@AlexandraKarabutova</p>
+          </div> 
+        </div>
+
+        <div class="col d-flex align-items-start">
+          <svg class="bi text-muted flex-shrink-0 me-3" width="1.75em" height="1.75em"><use xlink:href="#cpu-fill"/></svg>
+          <img src="{% static 'img/email.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+          <div>
+            <h4 class="fw-bold mb-0">E-mail</h4>
+            <p>karabutova.alexa@yandex.ru</p>
+          </div>
+        </div>
+
+        <div class="col d-flex align-items-start">
+          <svg class="bi text-muted flex-shrink-0 me-3" width="1.75em" height="1.75em"><use xlink:href="#cpu-fill"/></svg>
+          <img src="{% static 'img/hh.svg' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+          <div>
+            <h4 class="fw-bold mb-0">HeadHunter</h4>
+            <p><a href="https://spb.hh.ru/resume/29a49366ff09e49b700039ed1f6e7a39674f43">Резюме</a></p>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="col-md-5">
+        <img src="{% static 'img/author.jpg' %}" class="figure-img img-fluid rounded">
+      </div>  
+
+    </div>
+    
+  </div>  
+{% endblock %}
