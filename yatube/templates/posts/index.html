@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-  <h1> Последние обновления на сайте </h1>
+  <h1 class="my-4"> Последние обновления на сайте </h1>
   {% for post in page_obj %}
     <ul>
       <li>
@@ -17,7 +17,7 @@
         Дата публикации: {{ post.pub_date|date:"d E Y" }}
       </li>
     </ul>
-    <p> {{ post.text }} </p> 
+    <p> {{ post.text|truncatewords:15 }} </p> 
     <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация </a>
     {% if post.group %}
     <article>

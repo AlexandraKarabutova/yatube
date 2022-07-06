@@ -19,7 +19,7 @@
           Дата публикации: {{ post.pub_date|date:"d E Y" }}
         </li>
       </ul>
-      <p> {{ post.text }} </p> 
+      <p> {{ post.text|truncatewords:15 }} </p> 
       <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация </a>
       <article>
       <a href="{% url 'posts:group_list' post.group.slug %}">Все записи группы</a>

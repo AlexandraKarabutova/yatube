@@ -26,7 +26,7 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = User.objects.get(username=username)
-    post_list = Post.objects.filter(author=author)
+    post_list = author.posts.select_related()
     page_obj = paginator(post_list, request)
     context = {
         'author': author,
@@ -36,7 +36,7 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = Post.objects.get(id=post_id)
+    post = get_object_or_404(Post, id=post_id)
     author = post.author
     context = {
         'post': post,
@@ -46,7 +46,7 @@ def post_detail(request, post_id):
 
 
 @login_required
-def post_create(request):
+def create_post(request):
     template = 'posts/create_post.html'
     if request.method == 'POST':
         form = PostForm(request.POST or None)
