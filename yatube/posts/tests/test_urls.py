@@ -1,6 +1,8 @@
-from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
 from http import HTTPStatus
+
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.test import Client, TestCase
 
 from ..models import Group, Post
 
@@ -32,6 +34,8 @@ class PostsURLTests(TestCase):
 
         self.author = Client()
         self.author.force_login(PostsURLTests.author)
+
+        cache.clear()
 
     def test_posts_url_exists_at_desired_location(self):
         """Проверка доступности адресов
@@ -105,6 +109,7 @@ class PostsURLTests(TestCase):
         response_edit = self.author.get(
             f'/posts/{PostsURLTests.post.pk}/edit/'
         )
+        response_follow_index = self.authorized_client.get('/follow/')
         posts_templates = {
             response_index: 'posts/index.html',
             response_group: 'posts/group_list.html',
@@ -112,6 +117,7 @@ class PostsURLTests(TestCase):
             response_post_id: 'posts/post_detail.html',
             response_create: 'posts/create_post.html',
             response_edit: 'posts/create_post.html',
+            response_follow_index: 'posts/follow_index.html',
         }
         for value, expected in posts_templates.items():
             with self.subTest(value=value):

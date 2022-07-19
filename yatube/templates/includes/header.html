@@ -8,23 +8,24 @@
             <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
             <span style="color:red">Ya</span>tube</a>
           </a>
+          <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto" role="search" action="{% url 'posts:index' %}">
+            <input type="search" class="form-control" placeholder="Search..." aria-label="Search" name="search">
+          </form>        
       {% comment %}
       Меню - список пунктов со стандартными классами Bootsrap.
       Класс nav-pills нужен для выделения активных пунктов 
-      {% endcomment %}
-      {% comment %}
       Внутри тега {% with %} переменная view_name - 
       это синоним для request.resolver_match.view_name
       {% endcomment %}
       {% with request.resolver_match.view_name as view_name %}  
       <ul class="nav nav-pills">
-        <li class="nav-item"> 
+        {% comment %} <li class="nav-item"> 
           <a class="nav-link {% if view_name  == 'about:author' %} active {% endif %}" href="{% url 'about:author' %}">Об авторе</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if view_name == 'about:tech' %} active {% endif %}" href="{% url 'about:tech' %}">Технологии</a>
-        </li>
-        {% if user.is_authenticated %} <!-- Проверка: авторизован ли пользователь? -->
+        </li> {% endcomment %}
+        {% if user.is_authenticated %}
         <li class="nav-item"> 
           <a class="nav-link {% if view_name == 'posts:create_post' %} active {% endif %}" href="{% url 'posts:create_post' %}">Новая запись</a>
         </li>
@@ -35,7 +36,7 @@
           <a class="nav-link link-light {% if view_name == 'users:logout' %} active {% endif %}" href="{% url 'users:logout' %}">Выйти</a>
         </li>
         <li>
-          Пользователь: {{ user.username }}
+          <a href="{% url 'posts:profile' user.username %}" class="btn btn-outline-success"> Пользователь: {{ user.username }} </a>
         </li>
         {% else %}
         <li class="nav-item"> 

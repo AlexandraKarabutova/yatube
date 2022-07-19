@@ -1,9 +1,14 @@
 from django.contrib import admin
 
-from .models import Group, Post
+from .models import Comment, Follow, Group, Post
+
+
+class CommentInline(admin.TabularInline):
+    model = Comment
 
 
 class PostAdmin(admin.ModelAdmin):
+    inlines = [CommentInline]
     list_display = ('pk', 'text', 'pub_date', 'author', 'group')
     list_editable = ('group',)
     search_fields = ('text',)
@@ -19,5 +24,11 @@ class PostGroup(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class FollowAdmin(admin.ModelAdmin):
+    model = Follow
+
+
 admin.site.register(Post, PostAdmin)
 admin.site.register(Group, PostGroup)
+admin.site.register(Follow, FollowAdmin)
+admin.site.register(Comment)
