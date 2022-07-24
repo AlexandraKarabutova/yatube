@@ -9,6 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
+from ..forms import PostForm
 from ..models import Follow, Group, Post
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -91,11 +92,16 @@ class PostPagesTests(TestCase):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.guest_client.get(reverse('posts:index'))
         first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.text, PostPagesTests.post.text)
-        self.assertEqual(first_object.group, PostPagesTests.post.group)
-        self.assertEqual(first_object.author, PostPagesTests.post.author)
-        self.assertEqual(first_object.pub_date, PostPagesTests.post.pub_date)
-        self.assertEqual(first_object.image, PostPagesTests.post.image)
+        context_names = {
+            first_object.text: PostPagesTests.post.text,
+            first_object.group: PostPagesTests.post.group,
+            first_object.author: PostPagesTests.post.author,
+            first_object.pub_date: PostPagesTests.post.pub_date,
+            first_object.image: PostPagesTests.post.image,
+        }
+        for value, expected in context_names.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
     def test_index_page_cache(self):
         """Список постов на главной странице сайта хранится в кэше."""
@@ -111,6 +117,7 @@ class PostPagesTests(TestCase):
         self.assertEqual(count_page_obj, 2)
         post_cache.delete()
         self.assertEqual(first_object.text, post_cache.text)
+        self.assertEqual(len(response.context['page_obj']), 2)
         cache.clear()
         response_new = self.guest_client.get(reverse('posts:index'))
         second_object = response_new.context['page_obj'][0]
@@ -128,11 +135,16 @@ class PostPagesTests(TestCase):
             )
         )
         first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.text, PostPagesTests.post.text)
-        self.assertEqual(first_object.group, PostPagesTests.post.group)
-        self.assertEqual(first_object.author, PostPagesTests.post.author)
-        self.assertEqual(first_object.pub_date, PostPagesTests.post.pub_date)
-        self.assertEqual(first_object.image, PostPagesTests.post.image)
+        context_names = {
+            first_object.text: PostPagesTests.post.text,
+            first_object.group: PostPagesTests.post.group,
+            first_object.author: PostPagesTests.post.author,
+            first_object.pub_date: PostPagesTests.post.pub_date,
+            first_object.image: PostPagesTests.post.image,
+        }
+        for value, expected in context_names.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
         Post.objects.create(
             author=PostPagesTests.author,
             text='Тестовый длинный пост без группы',
@@ -148,11 +160,16 @@ class PostPagesTests(TestCase):
                 kwargs={'username': f'{PostPagesTests.author.username}'})
         )
         first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.text, PostPagesTests.post.text)
-        self.assertEqual(first_object.group, PostPagesTests.post.group)
-        self.assertEqual(first_object.author, PostPagesTests.post.author)
-        self.assertEqual(first_object.pub_date, PostPagesTests.post.pub_date)
-        self.assertEqual(first_object.image, PostPagesTests.post.image)
+        context_names = {
+            first_object.text: PostPagesTests.post.text,
+            first_object.group: PostPagesTests.post.group,
+            first_object.author: PostPagesTests.post.author,
+            first_object.pub_date: PostPagesTests.post.pub_date,
+            first_object.image: PostPagesTests.post.image,
+        }
+        for value, expected in context_names.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
     def test_post_id_page_show_correct_context(self):
         """Шаблон post_id сформирован с правильным контекстом."""
@@ -162,11 +179,16 @@ class PostPagesTests(TestCase):
                     )
         )
         first_object = response.context['post']
-        self.assertEqual(first_object.text, PostPagesTests.post.text)
-        self.assertEqual(first_object.group, PostPagesTests.post.group)
-        self.assertEqual(first_object.author, PostPagesTests.post.author)
-        self.assertEqual(first_object.pub_date, PostPagesTests.post.pub_date)
-        self.assertEqual(first_object.image, PostPagesTests.post.image)
+        context_names = {
+            first_object.text: PostPagesTests.post.text,
+            first_object.group: PostPagesTests.post.group,
+            first_object.author: PostPagesTests.post.author,
+            first_object.pub_date: PostPagesTests.post.pub_date,
+            first_object.image: PostPagesTests.post.image,
+        }
+        for value, expected in context_names.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
 
     def test_post_edit_page_show_correct_context(self):
         """Шаблон post_edit сформирован с правильным контекстом."""
@@ -183,7 +205,7 @@ class PostPagesTests(TestCase):
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
+                form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
 
     def test_create_post_page_show_correct_context(self):
@@ -198,8 +220,11 @@ class PostPagesTests(TestCase):
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
+                form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
+
+        form = response.context.get('form')
+        self.assertIsInstance(form, PostForm)
 
     def test_follow_index_show_correct_context(self):
         """Новая запись появляется в follow_index тех,
@@ -208,6 +233,8 @@ class PostPagesTests(TestCase):
         response = self.authorised_user.get(reverse('posts:follow_index'))
         first_object = response.context['page_obj'][0]
         self.assertEqual(first_object.text, PostPagesTests.post.text)
+        response_new = self.author.get(reverse('posts:follow_index'))
+        self.assertNotContains(response_new, PostPagesTests.post.text)
 
 
 class PaginatorViewsTest(TestCase):
@@ -257,17 +284,18 @@ class PaginatorViewsTest(TestCase):
         for response in responses_paginator:
             self.assertEqual(len(response.context['page_obj']), POST_LIMIT)
 
-    def test_second_page_contains_three_records(self):
+    def test_second_page_contains(self):
         """Проверка: на второй странице должно быть три поста."""
+        page_number = {'page': 2}
         responses_paginator = [
             self.guest_client.get(
-                reverse('posts:index') + '?page=2'
+                reverse('posts:index'), page_number
             ),
             self.guest_client.get(
                 reverse(
                     'posts:group_list',
                     kwargs={'slug': f'{PaginatorViewsTest.group.slug}'}
-                ) + '?page=2'
+                ), page_number
             ),
             self.guest_client.get(
                 reverse(
@@ -275,7 +303,7 @@ class PaginatorViewsTest(TestCase):
                     kwargs={
                         'username': f'{PaginatorViewsTest.author.username}'
                     }
-                ) + '?page=2'
+                ), page_number
             )
         ]
         for response in responses_paginator:

@@ -9,7 +9,7 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..forms import CommentForm, PostForm
-from ..models import Follow, Group, Post
+from ..models import Comment, Follow, Group, Post
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 User = get_user_model()
@@ -141,35 +141,36 @@ class CommentFormTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(CommentFormTests.auth)
         self.guest_client = Client()
-
-    def test_add_comment(self):
-        """Только авторизованный пользователь может комментировать пост."""
-        form_data = {
+        self.form_data = {
             'text': 'Текст комментария'
         }
+
+    def test_add_comment(self):
+        """Только авторизованный пользователь может комментировать пост,
+        комментарий появляется на странице поста."""
         response = self.authorized_client.post(
             reverse(
                 'posts:post_detail',
                 args=(f'{CommentFormTests.post.pk}',)
             ),
-            form_data
+            self.form_data
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertContains(response, 'Текст комментария')
 
     def test_add_comment_guest(self):
         """Неавторизованный пользователь не сможет добавить комментарий."""
-        form_data = {
-            'text': 'Текст комментария'
-        }
         response = self.guest_client.post(
             reverse(
                 'posts:post_detail',
                 args=(f'{CommentFormTests.post.pk}',)
             ),
-            form_data
+            self.form_data
         )
         self.assertNotContains(response, 'Текст комментария')
+        self.assertFalse(
+            Comment.objects.filter(text='Текст комментария').exists()
+        )
 
 
 class FollowFormTests(TestCase):
@@ -184,9 +185,6 @@ class FollowFormTests(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.author = Client()
-        self.author.force_login(CommentFormTests.auth)
-
         self.user = User.objects.create_user(username='Not_Author')
         self.authorized_user = Client()
         self.authorized_user.force_login(self.user)
@@ -203,10 +201,28 @@ class FollowFormTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_follow_count(self):
-        """"При подписке на пользователя создается объект класса Follow."""
+        """При подписке на пользователя создается объект класса Follow."""
         count = Follow.objects.count()
+        self.authorized_user.get(
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': f'{FollowFormTests.auth.username}'}
+            )
+        )
+        self.assertEqual(Follow.objects.count(), count + 1)
+
+    def test_unfollow_response(self):
+        """Авторизованный пользователь может отписаться от автора."""
         Follow.objects.create(
             user=self.user,
             author=FollowFormTests.auth
         )
-        self.assertEqual(Follow.objects.count(), count + 1)
+        count = Follow.objects.count()
+        response = self.authorized_user.get(
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': f'{FollowFormTests.auth.username}'}
+            )
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Follow.objects.count(), count - 1)

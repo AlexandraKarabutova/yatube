@@ -43,27 +43,21 @@ class PostsURLTests(TestCase):
         '/profile/<username>/',
         '/posts/<post_id>/',
         '/unexisting_page/'."""
-        response_index = self.guest_client.get('/')
-        response_group = self.guest_client.get(
-            f'/group/{PostsURLTests.group.slug}/'
-        )
-        response_profile = self.guest_client.get(
-            f'/profile/{PostsURLTests.author.username}/'
-        )
-        response_post_id = self.guest_client.get(
-            f'/posts/{PostsURLTests.post.pk}/'
-        )
+        urls = [
+            '/',
+            f'/group/{PostsURLTests.group.slug}/',
+            f'/profile/{PostsURLTests.author.username}/',
+            f'/posts/{PostsURLTests.post.pk}/',
+        ]
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.guest_client.get(url)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
         response_unexisting_page = self.guest_client.get('/unexisting_page/')
-        posts_urls = {
-            response_index.status_code: HTTPStatus.OK,
-            response_group.status_code: HTTPStatus.OK,
-            response_profile.status_code: HTTPStatus.OK,
-            response_post_id.status_code: HTTPStatus.OK,
-            response_unexisting_page.status_code: HTTPStatus.NOT_FOUND,
-        }
-        for value, expected in posts_urls.items():
-            with self.subTest(value=value):
-                self.assertEqual(value, expected)
+        self.assertEqual(
+            response_unexisting_page.status_code,
+            HTTPStatus.NOT_FOUND
+        )
 
     def test_create_url_exists_at_desired_location(self):
         """Страница '/create/' доступна авторизованному пользователю."""

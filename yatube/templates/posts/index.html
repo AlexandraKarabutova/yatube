@@ -7,6 +7,8 @@
 <div class="container">
   <h1 class="my-4"> Последние обновления на сайте </h1>
   {% include 'posts/includes/switcher.html' %}
+  {% load cache %}
+  {% cache 20 sidebar %}
   {% for post in page_obj %}
     <ul>
       <li>
@@ -22,7 +24,25 @@
     {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
       <img class="card-img my-2" src="{{ im.url }}">
     {% endthumbnail %}
-    <p> {{ post.text|truncatewords:15 }} </p> 
+    <p> {{ post.text|truncatewords:15|truncatechars:1000 }} </p> 
+    {% if post.comments.all %}
+      <div class="my-3 p-3 bg-body rounded shadow-sm">
+        <h6 class="border-bottom pb-2 mb-0">Комментарии</h6>
+        {% for comment in post.comments.all %}
+        <div class="d-flex text-muted pt-3">
+          <p class="pb-3 mb-0 small lh-sm border-bottom">
+            <strong class="d-block text-gray-dark">
+              <a href="{% url 'posts:profile' comment.author.username %}">
+                {{ comment.author.username }}
+              </a>
+            </strong>
+            {{ comment.text }}
+          </p>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+      
     <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация </a>
     {% if post.group %}
     <article>
@@ -31,5 +51,6 @@
     {% endif %}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}  
+  {% endcache %}
   {% include 'posts/includes/paginator.html' %}
 {% endblock %}
