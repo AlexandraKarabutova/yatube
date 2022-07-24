@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <div class="container">
+    <footer class="py-3 my-4">
+      {% with request.resolver_match.view_name as view_name %}
+      <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+        <li class="nav-item">
+          <a class="nav-link {% if view_name == 'about:author' %} active {% else %} text-muted {% endif %}" href="{% url 'about:author' %}">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if view_name == 'about:tech' %} active {% else %} text-muted {% endif %}" href="{% url 'about:tech' %}">Features</a>
+        </li>
+      </ul>
+      {% endwith %}
+      <p class="text-center text-muted">&copy; {{ year }} Copyright <span style="color:red">Ya</span>tube</p>
+    </footer>
+  </div>
